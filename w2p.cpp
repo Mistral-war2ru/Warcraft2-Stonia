@@ -3665,6 +3665,22 @@ DWORD pud_map5_size;
 void* pud_map_atr;
 DWORD pud_map_atr_size;
 
+PROC g_proc_004542FB;
+int grp_draw_cross(int a, int* u, void* grp, int frame)
+{
+    void* new_grp = NULL;
+    //-------------------------------------------------
+    //if level = orc1
+    //if race = human
+    //etc
+    //new_grp = grp_runecircle;
+
+    if (new_grp)
+        return ((int (*)(int, int*, void*, int))g_proc_004542FB)(a, u, new_grp, frame);
+    else
+        return ((int (*)(int, int*, void*, int))g_proc_004542FB)(a, u, grp, frame);//original
+}
+
 PROC g_proc_00454DB4;
 int grp_draw_bullet(int a, int* u, void* grp, int frame)
 {
@@ -5943,6 +5959,20 @@ void def_stat(byte u, WORD hp, byte str, byte prc, byte arm, byte rng, byte gold
     PATCH_SET((char*)(UNIT_TIME_TABLE + u), buf);
 }
 
+void def_upgr(byte u, WORD gold, WORD lum, WORD oil)
+{
+    char buf2[] = "\x0\x0";
+    buf2[0] = gold % 256;
+    buf2[1] = gold / 256;
+    PATCH_SET((char*)(UPGR_GOLD_TABLE + 2 * u), buf2);
+    buf2[0] = lum % 256;
+    buf2[1] = lum / 256;
+    PATCH_SET((char*)(UPGR_LUMBER_TABLE + 2 * u), buf2);
+    buf2[0] = oil % 256;
+    buf2[1] = oil / 256;
+    PATCH_SET((char*)(UPGR_OIL_TABLE + 2 * u), buf2);
+}
+
 PROC g_proc_0041F915;
 int map_load(void* map, DWORD size)
 {
@@ -5971,9 +6001,9 @@ int map_load(void* map, DWORD size)
     }
 
     def_stat(U_PEON, 40, 3, 3, 1, 1, 50, 0, 0, 50);
-    def_stat(U_GRUNT, 60, 5, 4, 3, 1, 70, 0, 0, 65);
+    def_stat(U_GRUNT, 60, 5, 4, 3, 1, 90, 0, 0, 65);
     def_stat(U_LOTHAR, 80, 8, 5, 6, 1, 100, 20, 0, 75);
-    def_stat(U_MAGE, 50, 0, 7, 1, 3, 100, 0, 0, 75);
+    def_stat(U_MAGE, 50, 0, 7, 1, 3, 120, 0, 0, 75);
     def_stat(U_DANATH, 160, 14, 3, 9, 0, 0, 0, 0, 0);
     def_stat(U_DRAGON, 125, 0, 8, 8, 6, 120, 40, 0, 120);
 
@@ -5983,23 +6013,42 @@ int map_load(void* map, DWORD size)
 
     if (*(byte*)LEVEL_OBJ != LVL_HUMAN1)
     {
-        def_stat(U_PIGFARM, 450, 0, 0, 20, 0, 60, 35, 0, 80);
-        def_stat(U_OBARRACK, 600, 0, 0, 20, 0, 90, 50, 0, 140);
+        def_stat(U_PIGFARM, 450, 0, 0, 20, 0, 70, 35, 0, 80);
+        def_stat(U_OBARRACK, 600, 0, 0, 20, 0, 100, 50, 0, 140);
     }
     else
     {
-        def_stat(U_PIGFARM, 450, 0, 0, 20, 0, 60, 35, 0, 0);
-        def_stat(U_OBARRACK, 600, 0, 0, 20, 0, 90, 50, 0, 0);
+        def_stat(U_PIGFARM, 450, 0, 0, 20, 0, 70, 35, 0, 0);
+        def_stat(U_OBARRACK, 600, 0, 0, 20, 0, 100, 50, 0, 0);
     }
-    def_stat(U_GREAT_HALL, 1250, 0, 0, 20, 0, 150, 100, 0, 255);
-    def_stat(U_STRONGHOLD, 1850, 0, 0, 20, 0, 120, 100, 0, 255);
-    def_stat(U_FORTRESS, 2400, 0, 0, 20, 0, 255, 125, 0, 255);
-    def_stat(U_OSMITH, 800, 0, 0, 20, 0, 90, 40, 0, 160);
-    def_stat(U_OLUMBER, 500, 0, 0, 20, 0, 70, 10, 0, 100);
-    def_stat(U_OGREMOUND, 900, 0, 0, 20, 0, 130, 45, 0, 200);
-    def_stat(U_ALCHEMIST, 500, 0, 0, 20, 0, 140, 30, 0, 120);
+    def_stat(U_GREAT_HALL, 1250, 0, 0, 20, 0, 125, 100, 0, 255);
+    def_stat(U_STRONGHOLD, 1850, 0, 0, 20, 0, 125, 100, 0, 255);
+    def_stat(U_FORTRESS, 2400, 0, 0, 20, 0, 250, 125, 0, 255);
+    def_stat(U_OSMITH, 800, 0, 0, 20, 0, 120, 40, 0, 160);
+    def_stat(U_OLUMBER, 500, 0, 0, 20, 0, 100, 35, 0, 100);
+    def_stat(U_OGREMOUND, 900, 0, 0, 20, 0, 125, 50, 0, 200);
+    def_stat(U_ALCHEMIST, 500, 0, 0, 20, 0, 125, 50, 0, 120);
+
+    def_stat(U_HTOWER, 100, 0, 0, 20, 0, 100, 40, 0, 50);
+    def_stat(U_HCANONTOWER, 160, 50, 0, 20, 0, 50, 10, 0, 80);
 
     def_stat(U_RUNESTONE, 1000, 0, 0, 20, 0, 0, 0, 0, 0);
+
+    def_upgr(UG_SP_HEAL, 750, 0, 0);
+    def_upgr(UG_SP_HASTE, 1000, 0, 0);
+    def_upgr(UG_SP_BLOODLUST, 1250, 0, 0);
+    def_upgr(UG_SP_RUNES, 2000, 500, 0);
+    def_upgr(UG_CATDMG1, 1000, 0, 0);
+    def_upgr(UG_UPBOAT_ATTACK1, 750, 0, 0);
+    def_upgr(UG_UPBOAT_ARMOR1, 1000, 500, 0);
+    def_upgr(UG_UPAXE1, 750, 150, 0);
+    def_upgr(UG_UPAXE2, 1500, 300, 0);
+    def_upgr(UG_UPSHIELD1, 600, 300, 0);
+    def_upgr(UG_UPSHIELD2, 1000, 500, 0);
+    def_upgr(UG_UPRANGERS, 1000, 0, 0);
+    def_upgr(UG_UPSPEAR1, 1000, 1000, 0);
+    def_upgr(UG_UPLONGBOW, 750, 0, 0);
+    def_upgr(UG_UPHSCOUTS, 1000, 200, 0);
 
     return original;
 }
@@ -11353,6 +11402,7 @@ void files_hooks()
 {
     files_init();
 
+    hook(0x004542FB, &g_proc_004542FB, (char*)grp_draw_cross);
     hook(0x00454DB4, &g_proc_00454DB4, (char*)grp_draw_bullet);
     hook(0x00454BCA, &g_proc_00454BCA, (char*)grp_draw_unit);
     hook(0x00455599, &g_proc_00455599, (char*)grp_draw_building);
